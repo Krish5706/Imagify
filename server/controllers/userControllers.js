@@ -1,4 +1,5 @@
 import userModel from "../models/userModel.js";
+import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import razorpay from  'razorpay';
@@ -6,36 +7,95 @@ import transactionModel from "../models/transactionModel.js";
 import dotenv from "dotenv";
 dotenv.config();
 
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+// const registerUser = async (req, res) => {
+//     try {
+//         const {name,email,password } = req.body;
+//         if (!name || !email || !password) {
+//             return res.json({ success: false, message: 'Missing Details' });
+//         }
+
+//         const salt = await bcrypt.genSalt(10);
+//         const hashedPassword = await bcrypt.hash(password, salt);
+
+//         const userData = {
+//             name,
+//             email,
+//             password: hashedPassword
+//         }
+
+//         const newUser = new userModel(userData);
+//         const user = await newUser.save();
+//         // const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+//         const token = jwt.sign({id:user._id},process.env.JWT_SECRET)
+//         console.log("SECRET USED FOR SIGNING:", process.env.JWT_SECRET);
+
+//         res.json({ success: true,token,user: { name: user.name } });
+//     }
+//     catch (error) {
+//         console.log(error)
+//         res.json({ success: false, message: error.message });
+//     }
+
+// }
 const registerUser = async (req, res) => {
-    try {
-        const {name,email,password } = req.body;
-        if (!name || !email || !password) {
-            return res.json({ success: false, message: 'Missing Details' });
-        }
-
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        const userData = {
-            name,
-            email,
-            password: hashedPassword
-        }
-
-        const newUser = new userModel(userData);
-        const user = await newUser.save();
-        // const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-        const token = jwt.sign({id:user._id},process.env.JWT_SECRET)
-        console.log("SECRET USED FOR SIGNING:", process.env.JWT_SECRET);
-
-        res.json({ success: true,token,user: { name: user.name } });
-    }
-    catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message });
+  try {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+      return res.json({ success: false, message: "Missing Details" });
     }
 
-}
+    const existingUser = await userModel.findOne({ email });
+    if (existingUser) {
+      return res.json({ success: false, message: "Email already registered" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUser = new userModel({
+      name,
+      email,
+      password: hashedPassword,
+    });
+
+    const user = await newUser.save();
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+
+    // ✅ Send email notification
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Welcome to Imagify 🎉",
+      html: `
+        <h2>Hi ${name},</h2>
+        <p>Thank you for registering on <b>Imagify</b>.</p>
+        <p>Your account has been created successfully 🚀</p>
+        <p>Happy exploring!</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.json({
+      success: true,
+      token,
+      user: { name: user.name, email: user.email },
+      message: "User registered and email notification sent",
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
 
 const loginUser = async (req, res) => {
     try {
