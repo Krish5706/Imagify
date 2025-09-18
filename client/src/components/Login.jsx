@@ -27,6 +27,7 @@ function Login() {
                 setUser(data.user)
                 localStorage.setItem('token',data.token)
                 setShowLogin(false)
+                toast.success("Login successful 🎉")
               }else{
                 toast.error(data.message)
               }
@@ -40,6 +41,7 @@ function Login() {
                 setUser(data.user)
                 localStorage.setItem('token',data.token)
                 setShowLogin(false)
+                toast.success("Signup successful 🎉 Check your email for confirmation.")
               }else{
                 toast.error(data.message)
               }
