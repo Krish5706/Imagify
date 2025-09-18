@@ -58,7 +58,8 @@ const AppContextProvider = (props) => {
         localStorage.removeItem('token');
         setToken('');
         setUser(null);
-        navigate('/login');
+        navigate('/');
+        window.location.reload();
     }
 
     useEffect(() => {
