@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
@@ -15,7 +15,7 @@ const AppContextProvider = (props) => {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const navigate = useNavigate();
 
-    const loadCreditsData = async () => {
+    const loadCreditsData = useCallback(async () => {
         try {
             const { data } = await axios.post(
                 `${backendUrl}/api/user/credits`,
@@ -33,7 +33,7 @@ const AppContextProvider = (props) => {
             console.log(error);
             toast.error(error.message);
         }
-    };
+    }, [backendUrl, token]);
 
     const generateImage = async (prompt) => {
         try {
