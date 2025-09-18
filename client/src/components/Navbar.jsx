@@ -1,12 +1,14 @@
-import React, { useContext } from 'react'  // , { useState } 
+import React, { useContext, useState, useRef } from 'react'
 import {assets} from '../assets/assets'
 import { Link, useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
-    
+
 function Navbar() {
 
-    const {user, setShowLogin, logout ,credit} = useContext(AppContext);   
+    const {user, setShowLogin, logout ,credit} = useContext(AppContext);
     const navigate = useNavigate();
+    const [showDropdown, setShowDropdown] = useState(false);
+    const timeoutRef = useRef(null);
 
   return (
     <div className = 'flex items-center justify-between py-4'>
@@ -24,15 +26,30 @@ function Navbar() {
             </button>
             <p className='text-gray-600 max-sm:hidden pl-4'>Hi, {user.name}</p>
 
-            <div className='relative group'>
-                <img src={assets.profile_icon} className='w-10 drop-shadow' alt="" />
+            <div
+              className='relative'
+              onMouseLeave={() => {
+                timeoutRef.current = setTimeout(() => setShowDropdown(false), 200);
+              }}
+              onMouseEnter={() => {
+                if (timeoutRef.current) clearTimeout(timeoutRef.current);
+                setShowDropdown(true);
+              }}
+            >
+                <img
+                  src={assets.profile_icon}
+                  className='w-10 drop-shadow cursor-pointer'
+                  alt=""
+                />
 
-                <div className='absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-12'>
-                    <ul className='list-none m-0 p-2 bg-white rounded-md border text-sm'>
-                        <li onClick={logout} className='py-1 px-2 cursor-pointer pr-10'>Logout</li>
+                {showDropdown && (
+                  <div className='absolute top-12 right-0 z-10 text-black rounded-md shadow-lg border border-gray-200'>
+                    <ul className='list-none m-0 p-0 bg-white rounded-md text-sm min-w-[120px]'>
+                      <li onClick={() => { setShowDropdown(false); navigate('/history'); }} className='py-2 px-4 cursor-pointer hover:bg-gray-100 rounded-t-md'>History</li>
+                      <li onClick={() => { setShowDropdown(false); logout(); }} className='py-2 px-4 cursor-pointer hover:bg-gray-100 rounded-b-md'>Logout</li>
                     </ul>
-
-                </div>
+                  </div>
+                )}
             </div>
         </div>
         :

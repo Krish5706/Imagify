@@ -13,6 +13,8 @@ app.use(express.json());
 app.use(cors());
 await connectDB()
 
+app.use('/uploads', express.static('uploads'));
+
 app.use('/api/user', userRouter)
 app.use('/api/image', imageRouter)
 
