@@ -1,26 +1,5 @@
 # Imagify - AI Text to Image Generator
 
-[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
-[![Node.js Version](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen)](https://nodejs.org/)
-[![React Version](https://img.shields.io/badge/react-19.1.0-blue)](https://reactjs.org/)
-
-A full-stack web application that generates high-quality images from text prompts using advanced AI models. Users can create accounts, purchase credits, and generate images based on their descriptions.
-
-## Table of Contents
-
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Environment Variables](#environment-variables)
-- [Usage](#usage)
-- [Project Structure](#project-structure)
-- [API Endpoints](#api-endpoints)
-- [Contributing](#contributing)
-- [License](#license)
-- [Author](#author)
-- [Contact](#contact)
-
 ## Features
 
 - **AI-Powered Image Generation**: Convert text prompts into high-quality images using advanced AI models
@@ -30,6 +9,34 @@ A full-stack web application that generates high-quality images from text prompt
 - **Image History**: View and manage previously generated images
 - **Real-time Notifications**: Toast notifications for user feedback and status updates
 - **Secure File Uploads**: Handle image uploads and storage securely
+
+## Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   React Client  │    │   Express API   │    │   MongoDB       │
+│   (Port 5173)   │◄──►│   (Port 4000)   │◄──►│   Database      │
+│                 │    │                 │    │                 │
+│ - Components    │    │ - Controllers   │    │ - Users         │
+│ - Pages         │    │ - Routes        │    │ - Images        │
+│ - Context       │    │ - Middleware    │    │ - Transactions  │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                         ┌─────────────────┐
+                         │   External APIs │
+                         │                 │
+                         │ - Clipdrop API  │
+                         │ - Razorpay API  │
+                         └─────────────────┘
+```
+
+### System Flow
+1. **User Registration/Login** → JWT Token Generation
+2. **Credit Purchase** → Razorpay Payment Integration
+3. **Image Generation** → Text Prompt → Clipdrop API → Image Storage
+4. **History Management** → MongoDB Storage → User Dashboard
 
 ## Tech Stack
 
@@ -119,6 +126,7 @@ MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret_key
 RAZORPAY_KEY_ID=your_razorpay_key_id
 RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+CLIPDROP_API=your_clipdrop_api_key
 ```
 
 ### Environment Variable Descriptions:
@@ -127,6 +135,7 @@ RAZORPAY_KEY_SECRET=your_razorpay_key_secret
 - `JWT_SECRET`: Secret key for JWT token generation
 - `RAZORPAY_KEY_ID`: Razorpay API key ID for payments
 - `RAZORPAY_KEY_SECRET`: Razorpay API key secret for payments
+- `CLIPDROP_API`: API key for Clipdrop text-to-image service
 
 ## Usage
 
@@ -189,43 +198,20 @@ imagify/
 - `POST /register` - Register a new user account
 - `POST /login` - Authenticate user login
 - `GET /credits` - Retrieve user credit balance
+- `POST /credits` - Retrieve user credit balance (alternative)
 - `POST /pay-razor` - Initiate Razorpay payment for credit purchase
+- `POST /verify-razor` - Verify Razorpay payment
 
 ### Image Routes (`/api/image`)
 - `POST /generate-image` - Generate image from text prompt (requires credits)
-- `GET /user-images` - Retrieve user's generated image history
-
-## Contributing
-
-We welcome contributions to Imagify! To contribute:
-
-1. Fork the repository
-2. Create a new feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes and ensure they are well-tested
-4. Commit your changes (`git commit -m 'Add some amazing feature'`)
-5. Push to the branch (`git push origin feature/amazing-feature`)
-6. Open a Pull Request with a clear description of your changes
-
-### Development Guidelines
-- Follow the existing code style and structure
-- Write clear, concise commit messages
-- Test your changes thoroughly before submitting
-- Update documentation as needed
-
-## License
-
-This project is licensed under the ISC License - see the [LICENSE](LICENSE) file for details.
+- `GET /user-history` - Retrieve user's generated image history
+- `DELETE /delete-history` - Delete a specific history item
+- `POST /cleanup-orphaned-images` - Clean up orphaned image files
+- `POST /cleanup-old-images` - Clean up old images beyond retention period
 
 ## Author
 
-**Krish**
-
-## Contact
-
-- **GitHub**: [your-username](https://github.com/your-username)
-- **Email**: your-email@example.com
-
-For questions, bug reports, or feature requests, please open an issue on GitHub or contact the author directly.
+**Krish** **Mark**
 
 ---
 
