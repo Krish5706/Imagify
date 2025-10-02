@@ -74,11 +74,76 @@ export const deleteHistoryItem = async (req, res) => {
     try {
         const { id } = req.body;
         const userId = req.body.userId;
-        const historyItem = await imageHistoryModel.findOneAndDelete({ _id: id, userId });
+        const historyItem = await imageHistoryModel.findOne({ _id: id, userId });
         if (!historyItem) {
             return res.json({ success: false, message: 'History item not found or not authorized' });
         }
+
+        // Delete the image file from uploads folder
+        const imagePath = path.join('uploads', path.basename(historyItem.imageUrl));
+        if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+        }
+
+        // Delete the history record from database
+        await imageHistoryModel.findOneAndDelete({ _id: id, userId });
+
         res.json({ success: true, message: 'History item deleted' });
+    } catch (error) {
+        console.log(error.message);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+import { Types } from 'mongoose';
+
+// Cleanup orphaned images in uploads folder
+export const cleanupOrphanedImages = async (req, res) => {
+    try {
+        // Get all image URLs from database
+        const allHistory = await imageHistoryModel.find({}, 'imageUrl');
+        const referencedFiles = new Set(allHistory.map(item => path.basename(item.imageUrl)));
+
+        // Read all files in uploads folder
+        const uploadDir = path.join('uploads');
+        const files = fs.readdirSync(uploadDir);
+
+        // Find files not referenced in database
+        const orphanedFiles = files.filter(file => !referencedFiles.has(file));
+
+        // Delete orphaned files
+        orphanedFiles.forEach(file => {
+            const filePath = path.join(uploadDir, file);
+            fs.unlinkSync(filePath);
+        });
+
+        res.json({ success: true, message: `Deleted ${orphanedFiles.length} orphaned files.` });
+    } catch (error) {
+        console.log(error.message);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// Cleanup old images beyond retention period or limit per user
+export const cleanupOldImages = async (req, res) => {
+    try {
+        const retentionDays = 30; // Retain images for last 30 days
+        const retentionDate = new Date();
+        retentionDate.setDate(retentionDate.getDate() - retentionDays);
+
+        // Find images older than retentionDate
+        const oldImages = await imageHistoryModel.find({ timestamp: { $lt: retentionDate } });
+
+        // Delete image files and DB records
+        for (const image of oldImages) {
+            const imagePath = path.join('uploads', path.basename(image.imageUrl));
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+            }
+            await imageHistoryModel.deleteOne({ _id: image._id });
+        }
+
+        res.json({ success: true, message: `Deleted ${oldImages.length} old images beyond retention period.` });
     } catch (error) {
         console.log(error.message);
         res.json({ success: false, message: error.message });
