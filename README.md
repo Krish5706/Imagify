@@ -209,9 +209,9 @@ imagify/
 - `POST /cleanup-orphaned-images` - Clean up orphaned image files
 - `POST /cleanup-old-images` - Clean up old images beyond retention period
 
-## Author
+## Contributors
 
-**Krish** **Mark**
+**Krish Patel and Mark Patel**
 
 ---
 

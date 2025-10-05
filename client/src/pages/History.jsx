@@ -96,15 +96,8 @@ function History() {
     });
   };
 
-  const handleDownloadClick = (item) => {
-    setSelectedItem(item);
-    setSelectedAction('download');
-  };
+  // Removed unused functions handleDownloadClick and handleShareClick as their logic is now inline in buttons
 
-  const handleShareClick = (item) => {
-    setSelectedItem(item);
-    setSelectedAction('share');
-  };
 
   const handleActualDownload = async () => {
     if (!selectedItem) return;
@@ -198,11 +191,25 @@ function History() {
             <p className="text-sm mb-2 text-center">{item.prompt}</p>
             <div className="flex flex-col gap-2">
               <div className="flex gap-2 justify-center">
-                <button onClick={() => handleDownloadClick(item)} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-                  Download
+                <button onClick={() => {
+                  if (selectedItem && selectedItem._id === item._id && selectedAction === 'download') {
+                    handleActualDownload();
+                  } else {
+                    setSelectedItem(item);
+                    setSelectedAction('download');
+                  }
+                }} className={`px-4 py-2 rounded transition ${selectedItem && selectedItem._id === item._id && selectedAction === 'download' ? 'bg-blue-800' : 'bg-blue-600 hover:bg-blue-700'} text-white`}>
+                  {selectedItem && selectedItem._id === item._id && selectedAction === 'download' ? 'Confirm Download' : 'Download'}
                 </button>
-                <button onClick={() => handleShareClick(item)} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
-                  Share
+                <button onClick={() => {
+                  if (selectedItem && selectedItem._id === item._id && selectedAction === 'share') {
+                    handleActualShare();
+                  } else {
+                    setSelectedItem(item);
+                    setSelectedAction('share');
+                  }
+                }} className={`px-4 py-2 rounded transition ${selectedItem && selectedItem._id === item._id && selectedAction === 'share' ? 'bg-green-800' : 'bg-green-600 hover:bg-green-700'} text-white`}>
+                  {selectedItem && selectedItem._id === item._id && selectedAction === 'share' ? 'Confirm Share' : 'Share'}
                 </button>
                 <button onClick={() => handleDelete(item._id)} className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">
                   Delete
@@ -239,27 +246,12 @@ function History() {
                     </div>
                   </div>
                   <div className="flex gap-3 mt-4">
-                    {selectedAction === 'download' ? (
-                      <button
-                        onClick={handleActualDownload}
-                        className="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-                      >
-                        Download
-                      </button>
-                    ) : (
-                      <button
-                        onClick={handleActualShare}
-                        className="flex-1 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
-                      >
-                        Share
-                      </button>
-                    )}
                     <button
                       onClick={() => {
                         setSelectedItem(null);
                         setSelectedAction(null);
                       }}
-                      className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition"
+                      className="w-full bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition"
                     >
                       Cancel
                     </button>
