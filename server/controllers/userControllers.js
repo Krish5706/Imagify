@@ -70,17 +70,48 @@ const registerUser = async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
     // ✅ Send email notification
-    const mailOptions = {
+const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: "Welcome to Imagify 🎉",
+      subject: "🎉 Welcome to Imagify — Your Creative Journey Begins!",
       html: `
-        <h2>Hi ${name},</h2>
-        <p>Thank you for registering on <b>Imagify</b>.</p>
-        <p>Your account has been created successfully 🚀</p>
-        <p>Happy exploring!</p>
-      `,
-    };
+    <div style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #f9fafc; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+      <h2 style="color: #2e7d32; text-align: center;">Welcome, <span style="color:#1565c0;">${name}</span>!</h2>
+      <p style="font-size: 16px; color: #333;">
+        We're absolutely <b>thrilled</b> to have you join <b style="color:#2e7d32;">Imagify</b> — your creative companion for transforming ideas into visuals! 🌟
+      </p>
+
+      <hr style="border: none; border-top: 2px solid #e0e0e0; margin: 15px 0;">
+
+      <p style="font-size: 15px; color: #444;">
+        ✨ <b>Your account has been <u>successfully created</u></b>.<br>
+        You can now <span style="background-color: #fff59d; padding: 2px 5px; border-radius: 4px;">explore all our features</span> and start bringing your imagination to life.
+      </p>
+
+      <p style="font-size: 15px; color: #444;">
+        🖼️ <b>Here’s what you can do next:</b>
+        <ul style="color: #333; margin-left: 15px;">
+          <li><b>Generate stunning AI images</b> from your text prompts using our advanced <span style="color:#1565c0;"><b>ClipDrop API</b></span>.</li>
+          <li><b>Download your creations</b> in <u>multiple resolutions</u> for personal or professional use.</li>
+          <li>You start with <b><span style="background-color:#fff59d; padding:2px 5px; border-radius:4px;">5 free credits</span></b> — generate images and see the magic unfold!</li>
+          <li>Need more? <b>Purchase additional credits</b> anytime and continue creating without limits.</li>
+          <li><b>Browse your history</b> to revisit and re-download your previously generated images easily.</li>
+       </ul>
+      </p>
+
+      <div style="text-align: center; margin-top: 25px;">
+        <a href="https://imagify.example.com/login" style="background-color: #1565c0; color: white; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; display: inline-block;">
+          🚀 Start Creating Now
+        </a>
+      </div>
+
+      <p style="margin-top: 30px; color: #777; font-size: 13px; text-align: center;">
+        If you didn’t sign up for Imagify, please ignore this email.<br>
+        © ${new Date().getFullYear()} <b>Imagify</b> — All rights reserved.
+      </p>
+    </div>
+  `,
+};
 
     await transporter.sendMail(mailOptions);
 
